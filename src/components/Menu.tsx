@@ -1,3 +1,10 @@
+"use client";
+
+import Image from "next/image";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useUser } from "@clerk/nextjs";
+
 const menuItems = [
   {
     title: "MENU",
@@ -112,3 +119,42 @@ const menuItems = [
     ],
   },
 ];
+
+const Menu = () => {
+  const { user } = useUser();
+  // Get the role (assuming it's stored in the publicMetadata)
+  const role = user?.publicMetadata?.role as string;
+  const pathname = usePathname();
+
+  return (
+    <div className="mt-4 text-sm">
+      {menuItems.map((section) => (
+        <div className="flex flex-col gap-2" key={section.title}>
+          <span className="hidden lg:block text-gray-400 font-light my-4">
+            {section.title}
+          </span>
+          {section.items.map((item) => {
+            if (item.visible.includes(role)) {
+              const isActive = pathname === item.href;
+              return (
+                <Link
+                  href={item.href}
+                  key={item.label}
+                  className={`group flex items-center gap-4 text-gray-500 py-2 rounded-md md:px-2 transition-colors duration-300 ${
+                    isActive ? "bg-lamaSkyLight" : "hover:bg-lamaSkyLight"
+                  }`}
+                >
+                  <Image src={item.icon} alt="" width={20} height={20} />
+                  <span className="hidden lg:block">{item.label}</span>
+                </Link>
+              );
+            }
+            return null;
+          })}
+        </div>
+      ))}
+    </div>
+  );
+};
+
+export default Menu;
